@@ -6,6 +6,8 @@ latch = Pin(22, Pin.OUT) # RCLK (storage register clock input)
 clock = Pin(21, Pin.OUT) # SRCLK (shift register clock input)
 srclr = Pin(19, Pin.OUT) # SRCLR (clear register)
 
+TOTAL_STATIONS = 200
+
 def shift_bit(value):
     data.value(value)
     clock.value(1)
@@ -19,19 +21,14 @@ def clear_register():
     srclr.value(0)
     srclr.value(1)
 
-def shift_and_update_whole_number(value):
-    for _ in range(0, 8):
-        bit = value & 1
-        shift_bit(bit)
-        value >>= 1
-        
-        update_register()
-
-clear_register()
-
-while True:
-    numbers = [0, 128, 32, 160, 8, 136, 40, 168, 2, 130, 34, 162, 10, 138, 42, 170]
+def enable_station_lights(station_ids):
+    station_ids_set = set(station_ids)
     
-    for number in numbers:
-        shift_and_update_whole_number(number)
-        time.sleep(0.5)
+    for station_id in range(TOTAL_STATIONS - 1, -1, -1):
+        if station_id in station_ids_set:
+            shift_bit(1)
+        else:
+            shift_bit(0)
+
+    update_register()
+
